@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+#
+# Runtime paths
+#
+
+STATE_DIR="$HOME/.local/state/screenwarn"
+mkdir -p "$STATE_DIR"
+
+WATCHER_LOG="$STATE_DIR/watcher.log"
+
+#
+# Logging helper
+#
+
+log() {
+    local timestamp
+    timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+    echo "[$timestamp] $*" | tee -a "$WATCHER_LOG"
+}
+
+#
+# Startup message
+#
+
+log "Starting KDE lockscreen watcher..."
+log "Watching for authentication failures from kscreenlocker_greet..."
+
+#
+# Journal monitor loop
+#
+
+journalctl --user -f \
+    SYSLOG_IDENTIFIER=kscreenlocker_greet \
+    -o cat \
+| while read -r line; do
+
+    #
+    # Detect failed unlocks
+    #
+
+    if [[ "$line" == *"authentication failure"* ]]; then
+
+        timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+        log "Failed unlock detected"
+        log "$line"
+
+        #
+        # Spawn asynchronous transient worker
+        #
+
+EVENT_LINE="$line"
+
+systemd-run --user --collect \
+    --unit="screenwarn-event-$(date +%s)" \
+    "$HOME/Projects/screenwarn/bin/screenwarn-capture" \
+    "$EVENT_LINE"
+
+    fi
+
+done

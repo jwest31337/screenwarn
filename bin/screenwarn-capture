@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+#
+# Input event line
+#
+
+EVENT_LINE="${1:-unknown event}"
+
+#
+# Runtime paths
+#
+
+STATE_DIR="$HOME/.local/state/screenwarn"
+EVENT_ROOT="$HOME/.local/share/screenwarn/events"
+
+mkdir -p "$STATE_DIR"
+mkdir -p "$EVENT_ROOT"
+
+HANDLER_LOG="$STATE_DIR/handler.log"
+
+#
+# Webcam settings
+#
+
+CAMERA_DEVICE="/dev/video0"
+
+CAPTURE_SIZE="1280x720"
+CAPTURE_FPS="10"
+CAPTURE_SECONDS="2"
+
+STEALTH_DELAY="0.7"
+
+#
+# Logging helper
+#
+
+log() {
+    local timestamp
+    timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+    echo "[$timestamp] $*" >> "$HANDLER_LOG"
+}
+
+#
+# Event directory setup
+#
+
+EVENT_ID=$(date +"%Y-%m-%d_%H-%M-%S")
+EVENT_DIR="$EVENT_ROOT/$EVENT_ID"
+
+mkdir -p "$EVENT_DIR"
+
+#
+# Update "latest" symlink
+#
+
+ln -sfn "$EVENT_DIR" "$HOME/.local/share/screenwarn/latest"
+
+#
+# Media paths
+#
+
+MP4_PATH="$EVENT_DIR/capture.mp4"
+
+#
+# Startup logging
+#
+
+log "Creating event archive: $EVENT_ID"
+
+#
+# Save triggering journal line
+#
+
+echo "$EVENT_LINE" > "$EVENT_DIR/journal.txt"
+
+#
+# Collect nearby WiFi information
+#
+
+nmcli -t -f SSID,SIGNAL dev wifi \
+    > "$EVENT_DIR/wifi.txt" \
+    2>/dev/null || true
+
+#
+# Metadata file
+#
+
+cat > "$EVENT_DIR/metadata.env" <<EOF
+EVENT_ID=$EVENT_ID
+TIMESTAMP=$(date --iso-8601=seconds)
+HOSTNAME=$(hostname)
+USER=$USER
+EOF
+
+#
+# Human-readable event report
+#
+
+cat > "$EVENT_DIR/event.log" <<EOF
+Screenwarn Event Report
+=======================
+
+Event ID:
+$EVENT_ID
+
+Timestamp:
+$(date)
+
+Hostname:
+$(hostname)
+
+User:
+$USER
+
+Trigger:
+KDE lockscreen authentication failure
+
+Journal Event:
+$EVENT_LINE
+EOF
+
+#
+# Brief delay before webcam activation
+#
+
+log "Waiting briefly before webcam activation..."
+
+sleep "$STEALTH_DELAY"
+
+#
+# Webcam capture
+#
+
+log "Starting webcam capture..."
+
+if ffmpeg \
+    -loglevel quiet \
+    -f video4linux2 \
+    -framerate "$CAPTURE_FPS" \
+    -video_size "$CAPTURE_SIZE" \
+    -i "$CAMERA_DEVICE" \
+    -t "$CAPTURE_SECONDS" \
+    -y "$MP4_PATH"
+then
+    log "Webcam capture complete: $MP4_PATH"
+else
+    log "ERROR: Webcam capture failed"
+fi
+
+#
+# Completion log
+#
+
+log "Event archive complete: $EVENT_DIR"
