@@ -1,0 +1,6 @@
+*.log
+*.mp4
+*.gif
+events/
+.env
+screenwarn.env
