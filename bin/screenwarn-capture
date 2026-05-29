@@ -3,6 +3,20 @@
 set -euo pipefail
 
 #
+# Config
+#
+
+CONFIG_FILE="$HOME/.config/screenwarn.env"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "ERROR: Missing config file: $CONFIG_FILE"
+    exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$CONFIG_FILE"
+
+#
 # Input event line
 #
 
@@ -21,16 +35,20 @@ mkdir -p "$EVENT_ROOT"
 HANDLER_LOG="$STATE_DIR/handler.log"
 
 #
-# Webcam settings
+# Fallback defaults
 #
 
-CAMERA_DEVICE="/dev/video0"
+CAMERA_DEVICE="${CAMERA_DEVICE:-/dev/video0}"
 
-CAPTURE_SIZE="1280x720"
-CAPTURE_FPS="10"
-CAPTURE_SECONDS="2"
+CAPTURE_SIZE="${CAPTURE_SIZE:-1280x720}"
+CAPTURE_FPS="${CAPTURE_FPS:-10}"
+CAPTURE_SECONDS="${CAPTURE_SECONDS:-2}"
 
-STEALTH_DELAY="0.7"
+STEALTH_DELAY="${STEALTH_DELAY:-0.7}"
+
+ENABLE_NTFY="${ENABLE_NTFY:-false}"
+
+NTFY_PRIORITY="${NTFY_PRIORITY:-urgent}"
 
 #
 # Logging helper
@@ -63,6 +81,8 @@ ln -sfn "$EVENT_DIR" "$HOME/.local/share/screenwarn/latest"
 #
 
 MP4_PATH="$EVENT_DIR/capture.mp4"
+GIF_PATH="$EVENT_DIR/capture.gif"
+PALETTE_PATH="$EVENT_DIR/palette.png"
 
 #
 # Startup logging
@@ -146,12 +166,80 @@ if ffmpeg \
     -y "$MP4_PATH"
 then
     log "Webcam capture complete: $MP4_PATH"
+
+    #
+    # GIF palette generation
+    #
+
+    log "Generating GIF palette..."
+
+    if ffmpeg \
+        -loglevel quiet \
+        -i "$MP4_PATH" \
+        -vf palettegen \
+        -y "$PALETTE_PATH"
+    then
+        log "GIF palette generated"
+    else
+        log "ERROR: GIF palette generation failed"
+    fi
+
+    #
+    # GIF preview generation
+    #
+
+    log "Generating GIF preview..."
+
+    if ffmpeg \
+        -loglevel quiet \
+        -i "$MP4_PATH" \
+        -i "$PALETTE_PATH" \
+        -lavfi "fps=6,paletteuse" \
+        -y "$GIF_PATH"
+    then
+        log "GIF preview created: $GIF_PATH"
+    else
+        log "ERROR: GIF generation failed"
+    fi
+
+    #
+    # Cleanup temporary palette
+    #
+
+    rm -f "$PALETTE_PATH"
+
 else
     log "ERROR: Webcam capture failed"
 fi
 
 #
-# Completion log
+# Event archive completion
 #
 
 log "Event archive complete: $EVENT_DIR"
+
+#
+# NTFY notification
+#
+
+if [[ "${ENABLE_NTFY,,}" == "true" ]]; then
+
+    log "Sending NTFY notification..."
+
+    if curl \
+        -s \
+        -H "Authorization: Bearer $NTFY_TOKEN" \
+        -H "Title: Failed Unlock Attempt" \
+        -H "Priority: $NTFY_PRIORITY" \
+        -d "Failed unlock detected on $(hostname)
+
+Event ID:
+$EVENT_ID" \
+        "$NTFY_URL"
+    then
+        log "NTFY notification sent"
+    else
+        log "ERROR: Failed to send NTFY notification"
+    fi
+
+fi

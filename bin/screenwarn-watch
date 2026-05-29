@@ -3,13 +3,42 @@
 set -euo pipefail
 
 #
+# Config
+#
+
+CONFIG_FILE="$HOME/.config/screenwarn.env"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "ERROR: Missing config file: $CONFIG_FILE"
+    exit 1
+fi
+
+# shellcheck disable=SC1090
+source "$CONFIG_FILE"
+
+#
 # Runtime paths
 #
 
 STATE_DIR="$HOME/.local/state/screenwarn"
+
 mkdir -p "$STATE_DIR"
 
 WATCHER_LOG="$STATE_DIR/watcher.log"
+
+#
+# Cooldown state
+#
+
+COOLDOWN_FILE="$STATE_DIR/last_event.timestamp"
+
+#
+# Fallback defaults
+#
+
+SCREENWARN_CAPTURE_SCRIPT="${SCREENWARN_CAPTURE_SCRIPT:-$HOME/Projects/screenwarn/bin/screenwarn-capture}"
+
+COOLDOWN_SECONDS="${COOLDOWN_SECONDS:-30}"
 
 #
 # Logging helper
@@ -19,15 +48,42 @@ log() {
     local timestamp
     timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
-    echo "[$timestamp] $*" | tee -a "$WATCHER_LOG"
+    echo "[$timestamp] $*" >> "$WATCHER_LOG"
 }
 
 #
-# Startup message
+# Cooldown helper
+#
+
+is_in_cooldown() {
+
+    if [[ ! -f "$COOLDOWN_FILE" ]]; then
+        return 1
+    fi
+
+    local last_event
+    local current_time
+    local elapsed
+
+    last_event=$(cat "$COOLDOWN_FILE")
+    current_time=$(date +%s)
+
+    elapsed=$((current_time - last_event))
+
+    if (( elapsed < COOLDOWN_SECONDS )); then
+        return 0
+    fi
+
+    return 1
+}
+
+#
+# Startup
 #
 
 log "Starting KDE lockscreen watcher..."
 log "Watching for authentication failures from kscreenlocker_greet..."
+log "Cooldown timer set to ${COOLDOWN_SECONDS} seconds"
 
 #
 # Journal monitor loop
@@ -44,21 +100,36 @@ journalctl --user -f \
 
     if [[ "$line" == *"authentication failure"* ]]; then
 
-        timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-
         log "Failed unlock detected"
         log "$line"
 
         #
-        # Spawn asynchronous transient worker
+        # Cooldown protection
         #
 
-EVENT_LINE="$line"
+        if is_in_cooldown; then
+            log "Cooldown active, ignoring event"
+            continue
+        fi
 
-systemd-run --user --collect \
-    --unit="screenwarn-event-$(date +%s)" \
-    "$HOME/Projects/screenwarn/bin/screenwarn-capture" \
-    "$EVENT_LINE"
+        #
+        # Update cooldown timestamp
+        #
+
+        date +%s > "$COOLDOWN_FILE"
+
+        EVENT_LINE="$line"
+
+        #
+        # Spawn asynchronous worker
+        #
+
+        log "Launching screenwarn capture worker"
+
+        systemd-run --user --collect \
+            --unit="screenwarn-event-$(date +%s)" \
+            "$SCREENWARN_CAPTURE_SCRIPT" \
+            "$EVENT_LINE"
 
     fi
 
