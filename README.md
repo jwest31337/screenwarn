@@ -1,6 +1,11 @@
 # screenwarn
 
-KDE Plasma failed-unlock intrusion notifier for Linux laptops.
+**KDE Plasma failed-unlock intrusion notifier for Linux laptops.**
+
+[![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE)
+[![Shell Script](https://img.shields.io/badge/language-Shell_Script-yellow.svg)](https://www.shellscript.sh/)
+[![KDE Plasma](https://img.shields.io/badge/Platform-KDE_Plasma-1f425f.svg)](https://kde.org/plasma-desktop/)
+[![GitHub release](https://img.shields.io/github/v/release/jwest31337/screenwarn)](https://github.com/jwest31337/screenwarn/releases)
 
 Features:
 - Detects failed KDE lockscreen unlock attempts
