@@ -1,0 +1,12 @@
+[Unit]
+Description=screenwarn KDE lockscreen monitor
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/screenwarn-watch
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
