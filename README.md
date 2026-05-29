@@ -1,4 +1,4 @@
-# screewWarn
+# screenwarn
 
 KDE Plasma failed-unlock intrusion notifier for Linux laptops.
 
@@ -21,9 +21,9 @@ After installing msmtp, Users must configure:
 
 ~/.config/msmtp/config
 
-```bash
 Example minimum configuration for msmtp to work correctly:
 
+```bash
 defaults
 auth           on
 tls            on
