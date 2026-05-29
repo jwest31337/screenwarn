@@ -1,15 +1,14 @@
-# screenwarn
+# ScreenWarn
 
 **A privacy-first KDE Plasma intrusion detection tool that alerts you instantly when someone fails to unlock your locked desktop.**
 
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE)
 [![Shell Script](https://img.shields.io/badge/language-Shell_Script-yellow.svg)](https://www.shellscript.sh/)
 [![KDE Plasma](https://img.shields.io/badge/Platform-KDE_Plasma-1f425f.svg)](https://kde.org/plasma-desktop/)
-[![GitHub release](https://img.shields.io/github/v/release/jwest31337/screenwarn)](https://github.com/jwest31337/screenwarn/releases)
 
 ---
 
-screenwarn captures a video/GIF with the webcam, sends push notifications (NTFY) and emails, and logs everything locally. Designed for the security-conscious Linux user.
+ScreenWarn captures a video/GIF with the webcam, sends push notifications (NTFY) and emails, and logs everything locally. Designed for the security-conscious Linux user.
 
 
 Features:
