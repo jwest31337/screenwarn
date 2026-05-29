@@ -2,7 +2,7 @@
 
 **A privacy-first KDE Plasma intrusion detection tool that alerts you instantly when someone fails to unlock your locked desktop.**
 
-screenwarn captures a vide with the webcam, sends push notifications (NTFY) and emails, and logs everything locally. Designed for the security-conscious Linux user.
+screenwarn captures a video/GIF with the webcam, sends push notifications (NTFY) and emails, and logs everything locally. Designed for the security-conscious Linux user.
 
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE)
 [![Shell Script](https://img.shields.io/badge/language-Shell_Script-yellow.svg)](https://www.shellscript.sh/)
