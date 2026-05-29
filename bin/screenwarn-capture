@@ -52,6 +52,8 @@ NTFY_PRIORITY="${NTFY_PRIORITY:-urgent}"
 ENABLE_EMAIL="${ENABLE_EMAIL:-false}"
 EMAIL_ATTACH_MP4="${EMAIL_ATTACH_MP4:-false}"
 
+RETENTION_DAYS="${RETENTION_DAYS:-30}"
+
 #
 # Logging helper
 #
@@ -228,9 +230,21 @@ if [[ "${ENABLE_NTFY,,}" == "true" ]]; then
 
     log "Sending NTFY notification..."
 
+    #
+    # Optional authorization header
+    #
+
+    NTFY_HEADERS=()
+
+    if [[ -n "${NTFY_TOKEN:-}" ]]; then
+        NTFY_HEADERS+=(
+            -H "Authorization: Bearer $NTFY_TOKEN"
+        )
+    fi
+
     if curl \
         -s \
-        -H "Authorization: Bearer $NTFY_TOKEN" \
+        "${NTFY_HEADERS[@]}" \
         -H "Title: Failed Unlock Attempt" \
         -H "Priority: $NTFY_PRIORITY" \
         -d "Failed unlock detected on $(hostname)
@@ -292,6 +306,20 @@ EOF
     fi
 
 fi
+
+#
+# Cleanup old events
+#
+
+log "Running retention cleanup..."
+
+find "$EVENT_ROOT" \
+    -mindepth 1 \
+    -maxdepth 1 \
+    -type d \
+    -mtime +"$RETENTION_DAYS" \
+    -exec rm -rf {} + \
+    2>/dev/null || true
 
 #
 # Final completion
