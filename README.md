@@ -1,4 +1,4 @@
-# screenwarn
+# ScreenWarn
 
 KDE Plasma failed-unlock intrusion notifier for Linux laptops.
 
