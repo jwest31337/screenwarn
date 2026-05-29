@@ -1,6 +1,6 @@
 # screenwarn
 
-**A privacy-first KDE Plasma intrusion detection tool that alerts you instantly when someone fails to unlock you locked desktop.**
+**A privacy-first KDE Plasma intrusion detection tool that alerts you instantly when someone fails to unlock your locked desktop.**
 
 screenwarn captures a vide with the webcam, sends push notifications (NTFY) and emails, and logs everything locally. Designed for the security-conscious Linux user.
 
