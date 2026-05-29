@@ -47,8 +47,10 @@ CAPTURE_SECONDS="${CAPTURE_SECONDS:-2}"
 STEALTH_DELAY="${STEALTH_DELAY:-0.7}"
 
 ENABLE_NTFY="${ENABLE_NTFY:-false}"
-
 NTFY_PRIORITY="${NTFY_PRIORITY:-urgent}"
+
+ENABLE_EMAIL="${ENABLE_EMAIL:-false}"
+EMAIL_ATTACH_MP4="${EMAIL_ATTACH_MP4:-false}"
 
 #
 # Logging helper
@@ -71,7 +73,7 @@ EVENT_DIR="$EVENT_ROOT/$EVENT_ID"
 mkdir -p "$EVENT_DIR"
 
 #
-# Update "latest" symlink
+# Update latest symlink
 #
 
 ln -sfn "$EVENT_DIR" "$HOME/.local/share/screenwarn/latest"
@@ -243,3 +245,56 @@ $EVENT_ID" \
     fi
 
 fi
+
+#
+# Email notification
+#
+
+if [[ "${ENABLE_EMAIL,,}" == "true" ]]; then
+
+    log "Sending email notification..."
+
+    EMAIL_SUBJECT="[screenwarn] Failed unlock on $(hostname)"
+
+    EMAIL_BODY=$(cat <<EOF
+Failed unlock detected.
+
+Hostname: $(hostname)
+Event ID: $EVENT_ID
+
+See attached GIF preview and MP4 evidence.
+EOF
+)
+
+    #
+    # Build attachment list
+    #
+
+    ATTACHMENTS=(-a "$GIF_PATH")
+
+    if [[ "${EMAIL_ATTACH_MP4,,}" == "true" ]]; then
+        ATTACHMENTS+=(-a "$MP4_PATH")
+    fi
+
+    #
+    # Send email with timeout protection
+    #
+
+    if echo "$EMAIL_BODY" | \
+        timeout 30 mutt \
+            -s "$EMAIL_SUBJECT" \
+            "${ATTACHMENTS[@]}" \
+            -- "$EMAIL_TO"
+    then
+        log "Email notification sent"
+    else
+        log "ERROR: Failed to send email notification"
+    fi
+
+fi
+
+#
+# Final completion
+#
+
+log "screenwarn event complete: $EVENT_ID"

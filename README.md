@@ -13,3 +13,14 @@ Features:
 
 Status:
 Early development, probably shouldn't be used as a production service.
+
+Dependencies:
+- bash
+- ffmpeg
+- curl
+- mutt
+- msmtp
+- msmtp-mta
+- NetworkMManager (nmcli)
+- systemd
+- KDE Plasma
