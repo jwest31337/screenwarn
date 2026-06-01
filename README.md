@@ -138,15 +138,3 @@ password ExamplePassword123
 ```
 
 Additionally, ```chmod 600 ~/.config/msmtp/config``` to protect the SMTP credentials by changing permissions to lock it down.
-
-
-Dependencies:
-- bash
-- ffmpeg
-- curl
-- mutt
-- msmtp
-- msmtp-mta
-- NetworkMManager (nmcli)
-- systemd
-- KDE Plasma
