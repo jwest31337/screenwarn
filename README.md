@@ -87,7 +87,7 @@ Failed unlock example from the KDE lock screen:
 
 Reciving a failed login notification on Android with NTFY push notifications:
 
-<img src="assets/ntfy_push.gif width="50%">
+<img src="assets/ntfy_push.gif" width="50%">
 
 ## Privacy
 
