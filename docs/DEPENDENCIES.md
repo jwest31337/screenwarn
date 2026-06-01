@@ -1,6 +1,6 @@
 # ScreenWarn Dependencies
 
-## ScreeWarn relies on a few external dependencies to do various things.
+## ScreenWarn relies on a few external dependencies to send you external email and NTFY push alerts.
 
 The software assumes you're already running KDE on your distro of choice, and have basic things like ```bash``` and ```systemd``` (Sorry to my Alpine Linux homies.) already installed.
 
