@@ -80,7 +80,8 @@ Any locally collected evidence (video, logs, etc.) can be manually removed.
 
 ## Screenshots
 
-TODO
+Failed unlock example from the KDE lock screen:
+<img src="assets/unlock_failed.gif" width="25%">
 
 
 ## Privacy
@@ -108,33 +109,3 @@ This utility is designed for KDE lockscreen support only. It requires a V4L2-com
 - Email notifications require working SMTP credentials. See /docs for detailed info.
 - Wi-Fi metadata collection (experimental feature) requires NetworkManager (```nmcli```)
 - Written and tested on Arch Linux / CachyOS
-
-
-
-Status:
-Early development, probably shouldn't be used as a production service.
-
-Email notifications require a working msmtp configuration.
-
-screenwarn does not manage SMTP credentials directly.
-After installing msmtp, Users must configure:
-
-~/.config/msmtp/config
-
-Example minimum configuration for msmtp to work correctly:
-
-```bash
-defaults
-auth           on
-tls            on
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
-account default
-host smtp.yourhost.com
-port 587
-from youremail@example.com
-user youremail@example.com
-password ExamplePassword123
-```
-
-Additionally, ```chmod 600 ~/.config/msmtp/config``` to protect the SMTP credentials by changing permissions to lock it down.
