@@ -85,6 +85,10 @@ Failed unlock example from the KDE lock screen:
 <img src="assets/unlock_failed.gif" width="50%">
 
 
+Reciving a failed login notification on Android with NTFY push notifications:
+
+<img src="assets/ntfy_push.gif width="50%">
+
 ## Privacy
 
 ScreenWarn is designed as a local-first security utility, and only collects the data (evidence) you want.
