@@ -81,7 +81,8 @@ Any locally collected evidence (video, logs, etc.) can be manually removed.
 ## Screenshots
 
 Failed unlock example from the KDE lock screen:
-<img src="assets/unlock_failed.gif" width="25%">
+
+<img src="assets/unlock_failed.gif" width="50%">
 
 
 ## Privacy
