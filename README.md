@@ -21,7 +21,7 @@ ScreenWarn captures a video/GIF with the webcam, sends push notifications (NTFY)
 - [Screenshots](#screenshots)
 - [Privacy](#privacy)
 - [Limitations](#limitations)
-- [License](#license)
+- [License](LICENSE)
 
 
 ## Features
